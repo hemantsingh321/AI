@@ -1,0 +1,87 @@
+/* Description:
+
+Imagine a room containing a monkey, chair and some bananas. That have been hanged from the center of ceiling. If the monkey is clever enough he can reach the bananas by placing the chair directly below the bananas and climb on the chair . 
+
+The problem is to prove the monkey can reach the bananas.
+
+The monkey can perform the following actions:
+1) Walk on the floor
+2) Climb the box
+3) Push the box around(if it is beside the box).
+4) Grasp the banana if it is standing on the box directly under the banana.
+
+*/
+
+% Production rules:
+
+can_reach 🡪 clever,close.
+get_on: 🡪 can_climb.
+
+under 🡪 in room,in_room, in_room,can_climb.
+Close 🡪 get_on,under | tall
+
+% Clauses:
+
+in_room(bananas).
+in_room(chair).
+in_room(monkey).
+clever(monkey).
+can_climb(monkey, chair).
+tall(chair).
+can_move(monkey, chair, bananas).
+can_reach(X, Y):-clever(X),close(X, Y).
+get_on(X,Y):- 
+	can_climb(X,Y).
+under(Y,Z):-
+	in_room(X),in_room(Y),
+	in_room(Z),can_climb(X,Y,Z).
+close(X,Z):-
+	get_on(X,Y), under(Y,Z);
+	tall(Y).
+
+
+
+% Queries:
+
+ ?- can_reach(A, B).
+ A = monkey.
+ B = banana.
+
+ ?- can_reach(monkey, banana).
+ Yes.
+
+
+
+
+% 8 Puzzle Problem Solver
+
+% Possible moves for the blank (represented by 0)
+move([0, X2, X3, X4, X5, X6, X7, X8, X9], [X2, 0, X3, X4, X5, X6, X7, X8, X9]).  % Blank moves right
+move([X1, 0, X3, X4, X5, X6, X7, X8, X9], [0, X1, X3, X4, X5, X6, X7, X8, X9]).  % Blank moves left
+move([X1, X2, 0, X4, X5, X6, X7, X8, X9], [X1, 0, X2, X4, X5, X6, X7, X8, X9]).  % Blank moves right
+move([X1, X2, X3, 0, X5, X6, X7, X8, X9], [X1, X2, X3, X5, 0, X6, X7, X8, X9]).  % Blank moves down
+move([X1, X2, X3, X4, 0, X6, X7, X8, X9], [X1, X2, 0, X4, X3, X6, X7, X8, X9]).  % Blank moves left
+move([X1, X2, X3, X4, X5, 0, X7, X8, X9], [X1, X2, X3, X4, 0, X5, X7, X8, X9]).  % Blank moves right
+move([X1, X2, X3, X4, X5, X6, 0, X8, X9], [X1, X2, X3, X4, X5, 0, X6, X8, X9]).  % Blank moves up
+move([X1, X2, X3, X4, X5, X6, X7, 0, X9], [X1, X2, X3, X4, 0, X6, X7, X5, X9]).  % Blank moves left
+move([X1, X2, X3, X4, X5, X6, X7, X8, 0], [X1, X2, X3, X4, X5, X6, 0, X7, X8]).  % Blank moves up
+
+% Goal state definition
+goal([1, 2, 3, 4, 5, 6, 7, 8, 0]).
+
+% Breadth-First Search (BFS) to solve the puzzle
+solve(Puzzle, Solution) :- bfs([[Puzzle, []]], Solution).
+
+% Base case: the first state matches the goal
+bfs([[State, Path] | _], Path) :- goal(State).
+
+% Recursive case: explore new states from the current state
+bfs([[State, Path] | Rest], Solution) :-
+    findall([NextState, [Move | Path]], (move(State, NextState), \+ member(NextState, Path)), NextStates),
+    append(Rest, NextStates, NewQueue),
+    bfs(NewQueue, Solution).
+
+% Query to solve the puzzle
+?- solve([2, 8, 3, 1, 6, 4, 7, 0, 5], Solution).
+
+
