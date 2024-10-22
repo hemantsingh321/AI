@@ -1,15 +1,6 @@
-#monkey banana
-
-% Production rules:
-
-can_reach 🡪 clever,close.
-get_on: 🡪 can_climb.
-
-under 🡪 in room,in_room, in_room,can_climb.
-Close 🡪 get_on,under | tall
+/* Monkey and Bananas Problem */
 
 % Clauses:
-
 in_room(bananas).
 in_room(chair).
 in_room(monkey).
@@ -17,223 +8,26 @@ clever(monkey).
 can_climb(monkey, chair).
 tall(chair).
 can_move(monkey, chair, bananas).
-can_reach(X, Y):-clever(X),close(X, Y).
-get_on(X,Y):- 
-	can_climb(X,Y).
-under(Y,Z):-
-	in_room(X),in_room(Y),
-	in_room(Z),can_climb(X,Y,Z).
-close(X,Z):-
-	get_on(X,Y), under(Y,Z);
-	tall(Y).
+
+% Rules
+can_reach(X, Y) :- clever(X), near_to(X, Y).
+
+get_on(X, Y) :- can_climb(X, Y).
+
+under(Y, Z) :-
+    in_room(X),
+    in_room(Y),
+    in_room(Z),
+    can_climb(X, Y).
+
+near_to(X, Z) :-
+    (get_on(X, Y), under(Y, Z));
+    (get_on(X, Y), tall(Y)).
 
 
+//command to check
+consult('monkey.pl').
 
-% Queries:
-
- ?- can_reach(A, B).
- A = monkey.
- B = banana.
-
- ?- can_reach(monkey, banana).
- Yes.
-
-
-
-
-% 8 Puzzle Problem Solver
-
-% Possible moves for the blank (represented by 0)
-move([0, X2, X3, X4, X5, X6, X7, X8, X9], [X2, 0, X3, X4, X5, X6, X7, X8, X9]).  % Blank moves right
-move([X1, 0, X3, X4, X5, X6, X7, X8, X9], [0, X1, X3, X4, X5, X6, X7, X8, X9]).  % Blank moves left
-move([X1, X2, 0, X4, X5, X6, X7, X8, X9], [X1, 0, X2, X4, X5, X6, X7, X8, X9]).  % Blank moves right
-move([X1, X2, X3, 0, X5, X6, X7, X8, X9], [X1, X2, X3, X5, 0, X6, X7, X8, X9]).  % Blank moves down
-move([X1, X2, X3, X4, 0, X6, X7, X8, X9], [X1, X2, 0, X4, X3, X6, X7, X8, X9]).  % Blank moves left
-move([X1, X2, X3, X4, X5, 0, X7, X8, X9], [X1, X2, X3, X4, 0, X5, X7, X8, X9]).  % Blank moves right
-move([X1, X2, X3, X4, X5, X6, 0, X8, X9], [X1, X2, X3, X4, X5, 0, X6, X8, X9]).  % Blank moves up
-move([X1, X2, X3, X4, X5, X6, X7, 0, X9], [X1, X2, X3, X4, 0, X6, X7, X5, X9]).  % Blank moves left
-move([X1, X2, X3, X4, X5, X6, X7, X8, 0], [X1, X2, X3, X4, X5, X6, 0, X7, X8]).  % Blank moves up
-
-% Goal state definition
-goal([1, 2, 3, 4, 5, 6, 7, 8, 0]).
-
-% Breadth-First Search (BFS) to solve the puzzle
-solve(Puzzle, Solution) :- bfs([[Puzzle, []]], Solution).
-
-% Base case: the first state matches the goal
-bfs([[State, Path] | _], Path) :- goal(State).
-
-% Recursive case: explore new states from the current state
-bfs([[State, Path] | Rest], Solution) :-
-    findall([NextState, [Move | Path]], (move(State, NextState), \+ member(NextState, Path)), NextStates),
-    append(Rest, NextStates, NewQueue),
-    bfs(NewQueue, Solution).
-
-% Query to solve the puzzle
-?- solve([2, 8, 3, 1, 6, 4, 7, 0, 5], Solution).
-
-
-# Informed search
-
-from queue import PriorityQueue
-
-v = 14
-graph = [[] for _ in range(v)]
-
-def best_first_search(source, target, n):
-    visited = [False] * n
-    pq = PriorityQueue()
-    pq.put((0, source))
-    visited[source] = True
-    
-    while not pq.empty():
-        current_node = pq.get()[1]
-        print(current_node, end=" ")
-
-        if current_node == target:
-            break
-        
-        for neighbor, cost in graph[current_node]:
-            if not visited[neighbor]:
-                visited[neighbor] = True
-                pq.put((cost, neighbor))
-    print()
-
-def add_edge(x, y, cost):
-    graph[x].append((y, cost))
-    graph[y].append((x, cost))
-
-add_edge(0, 1, 3)
-add_edge(0, 2, 6)
-add_edge(0, 3, 5)
-add_edge(1, 4, 9)
-add_edge(1, 5, 8)
-add_edge(2, 6, 12)
-add_edge(2, 7, 14)
-add_edge(3, 8, 7)
-add_edge(8, 9, 5)
-add_edge(8, 10, 6)
-add_edge(9, 11, 1)
-add_edge(9, 12, 10)
-add_edge(9, 13, 2)
-
-source = 0
-target = 9
-
-best_first_search(source, target, v)
-
-
-#bayes network
-
-pip install pgmpy
-
-from pgmpy.models import BayesianNetwork
-from pgmpy.inference import VariableElimination
-from pgmpy.factors.discrete import TabularCPD
-
-model = BayesianNetwork([
-    ('Disease_A', 'Symptom_X'),
-    ('Disease_B', 'Symptom_X')
-])
-
-cpd_disease_a = TabularCPD(
-    variable='Disease_A',
-    variable_card=2,
-    values=[[0.9],
-            [0.1]]
-)
-
-cpd_disease_b = TabularCPD(
-    variable='Disease_B',
-    variable_card=2,
-    values=[[0.95],
-            [0.05]]
-)
-
-cpd_symptom_x = TabularCPD(
-    variable='Symptom_X',
-    variable_card=2,
-    values=[
-        [0.01, 0.6, 0.6, 0.8],
-        [0.99, 0.4, 0.4, 0.2]
-    ],
-    evidence=['Disease_A', 'Disease_B'],
-    evidence_card=[2, 2]
-)
-
-model.add_cpds(cpd_disease_a, cpd_disease_b, cpd_symptom_x)
-
-assert model.check_model()
-
-inference = VariableElimination(model)
-
-query_result = inference.query(
-    variables=['Disease_A'],
-    evidence={'Symptom_X': 1}
-)
-
-print("Probability distribution for Disease A given Symptom X is present:")
-print(query_result)
-
-
-
-#uniformed
-
-from collections import defaultdict
-class Graph:
-    def __init__(self):
-        self.graph = defaultdict(list)
-
-    def addEdge(self, u, v):
-        self.graph[u].append(v)
-
-    def BFS(self, s):
-        visited = [False] * (max(self.graph) + 1)
-        queue = []
-        queue.append(s)
-        visited[s] = True
-
-        while queue:
-            s = queue.pop(0)
-            print(s, end=" ")
-
-            for i in self.graph[s]:
-                if not visited[i]:
-                    queue.append(i)
-                    visited[i] = True
-
-if __name__ == '__main__':
-    g = Graph()
-    g.addEdge(0, 1)
-    g.addEdge(0, 2)
-    g.addEdge(1, 2)
-    g.addEdge(2, 0)
-    g.addEdge(2, 3)
-    g.addEdge(3, 3)
-
-    print("Following is Breadth First Traversal (starting from vertex 2):")
-    g.BFS(2)
-
-
-#hillcliming
-
-
-def findlocalmaxima(n, arr):
-  maxima = [] 
-  if arr[0] > arr[1]: 
-    maxima.append(0) 
-  for i in range(1, n-1):
-    if arr[i-1] < arr[i] and arr[i] > arr[i+1]:
-      maxima.append(i) 
-  if arr[-1] > arr[-2]:
-    maxima.append(n-1) 
-  if len(maxima) > 0:
-    print("Points of local maxima are: ", end="")
-    print(*maxima) 
-  else: 
-    print("There are no points of local maxima")
-
-if __name__ =="__main__": 
-  n = 9
-  arr=[10,10,15,14,13,25,5,4,3] 
-  findlocalmaxima(n,arr)
+can_reach(monkey, bananas).
+near_to(monkey, bananas).
+under(chair, bananas).
