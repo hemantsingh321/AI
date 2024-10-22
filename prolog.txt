@@ -225,3 +225,27 @@ if __name__ == '__main__':
 
     print("Following is Breadth First Traversal (starting from vertex 2):")
     g.BFS(2)
+
+
+#hillcliming
+
+
+def findlocalmaxima(n, arr):
+  maxima = [] 
+  if arr[0] > arr[1]: 
+    maxima.append(0) 
+  for i in range(1, n-1):
+    if arr[i-1] < arr[i] and arr[i] > arr[i+1]:
+      maxima.append(i) 
+  if arr[-1] > arr[-2]:
+    maxima.append(n-1) 
+  if len(maxima) > 0:
+    print("Points of local maxima are: ", end="")
+    print(*maxima) 
+  else: 
+    print("There are no points of local maxima")
+
+if __name__ =="__main__": 
+  n = 9
+  arr=[10,10,15,14,13,25,5,4,3] 
+  findlocalmaxima(n,arr)
