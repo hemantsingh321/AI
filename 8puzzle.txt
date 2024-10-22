@@ -1,0 +1,32 @@
+% 8 Puzzle Problem Solver
+
+% Possible moves for the blank (represented by 0)
+move([0, X2, X3, X4, X5, X6, X7, X8, X9], [X2, 0, X3, X4, X5, X6, X7, X8, X9]).  % Blank moves right
+move([X1, 0, X3, X4, X5, X6, X7, X8, X9], [0, X1, X3, X4, X5, X6, X7, X8, X9]).  % Blank moves left
+move([X1, X2, 0, X4, X5, X6, X7, X8, X9], [X1, 0, X2, X4, X5, X6, X7, X8, X9]).  % Blank moves right
+move([X1, X2, X3, 0, X5, X6, X7, X8, X9], [X1, X2, X3, X5, 0, X6, X7, X8, X9]).  % Blank moves down
+move([X1, X2, X3, X4, 0, X6, X7, X8, X9], [X1, X2, 0, X4, X3, X6, X7, X8, X9]).  % Blank moves left
+move([X1, X2, X3, X4, X5, 0, X7, X8, X9], [X1, X2, X3, X4, 0, X5, X7, X8, X9]).  % Blank moves right
+move([X1, X2, X3, X4, X5, X6, 0, X8, X9], [X1, X2, X3, X4, X5, 0, X6, X8, X9]).  % Blank moves up
+move([X1, X2, X3, X4, X5, X6, X7, 0, X9], [X1, X2, X3, X4, 0, X6, X7, X5, X9]).  % Blank moves left
+move([X1, X2, X3, X4, X5, X6, X7, X8, 0], [X1, X2, X3, X4, X5, X6, 0, X7, X8]).  % Blank moves up
+
+% Goal state definition
+goal([1, 2, 3, 4, 5, 6, 7, 8, 0]).
+
+% Breadth-First Search (BFS) to solve the puzzle
+solve(Puzzle, Solution) :- bfs([[Puzzle, []]], Solution).
+
+% Base case: the first state matches the goal
+bfs([[State, Path] | _], Path) :- goal(State).
+
+% Recursive case: explore new states from the current state
+bfs([[State, Path] | Rest], Solution) :-
+    findall([NextState, [Move | Path]], (move(State, NextState), \+ member(NextState, Path)), NextStates),
+    append(Rest, NextStates, NewQueue),
+    bfs(NewQueue, Solution).
+
+//command to check
+solve([2, 8, 3, 1, 6, 4, 7, 0, 5], Solution).
+
+
